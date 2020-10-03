@@ -2,18 +2,88 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Title</title>
+  <title>Film List App</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
         integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-          crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
-          integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
-          integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
+        integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous"/>
+  <link rel="stylesheet" href="./assets/app.css">
 </head>
-<body>
 
-<script src="./app.js"></script>
+<body class="bg-dark">
+<div class="container">
+
+  <div class=" row shadow-lg p-1 mb-2 bg-white rounded"><!-- searchbox begin -->
+    <div class="col pl-0 pr-0">
+      <div class="input-group input-group-lg ">
+        <input type="text" class="form-control rounded-0" placeholder="film arayın...">
+        <div class="input-group-append">
+          <button class="btn btn-success rounded-left rounded-0" type="button" id="button-addon2">Ara</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- searchbox  end-->
+
+  <div class="row mb-1 rounded-bottom bg-white"><!-- search history begin -->
+    <div class="col">
+      <h6>arama geçmişi</h6>
+    </div>
+  </div><!-- search history end -->
+  <div class="row mb-1 rounded-bottom bg-white"><!-- search result begin -->
+    <div class="col">
+      <h2>Arama Sonuçları</h2>
+      <div class="card-group m">
+        <div class="col-md-4 mb-4">
+          <div class="card">
+            <img src="assets/img/download.png" width="80" height="280" class="card-img-top" alt="...">
+            <div class="card-body">
+              <h5 class="card-title">FİLM İSMİ</h5>
+              <p class="card-text pb-3">
+                <small class="text-muted float-left">ÇIKIŞ TARİHİ</small>
+                <small class="text-muted float-right">RATİNG</small>
+              </p>
+              <p class="card-text">içerik</p>
+            </div>
+            <div class="card-footer">
+              <small class="text-muted float-right">
+                <i class="far fa-heart fa-2x"></i></small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- search result end -->
+  <div class="row mb-1 rounded-bottom bg-white"><!-- favorites  begin -->
+    <div class="col">
+      <h2>Favori Filmler</h2>
+      <div class="card-group m">
+        <div class="col-md-4 mb-4">
+          <div class="card">
+            <img src="assets/img/download.png" width="80" height="280" class="card-img-top" alt="...">
+            <div class="card-body">
+              <h5 class="card-title">FİLM İSMİ</h5>
+              <p class="card-text pb-3">
+                <small class="text-muted float-left">ÇIKIŞ TARİHİ</small>
+                <small class="text-muted float-right">RATİNG</small>
+              </p>
+              <p class="card-text">içerik</p>
+            </div>
+            <div class="card-footer">
+              <small class="text-muted float-right">
+                <i class="far fa-heart fa-2x"></i></small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- favorites  end -->
+</div>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+        integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+<script src="assets/app.js"></script>
 </body>
 </html>
