@@ -1,37 +1,59 @@
-$(document).ready(() =>{
-	$('#searchForm').on('submit',(e) => {
+$(document).ready(() => {
+	$('#searchForm').on('submit', (e) => {
 		let searchText = $('#searchText').val();
 		getMovies(searchText);
 		e.preventDefault();
 	});
 });
-function getMovies(searchText){
-	axios.get('http://www.omdbapi.com/?i=tt3896198&apikey=7ddb68cb&s='+searchText)
+
+const filmCard = (imageSource, cardTitleText, releaseDate) => {
+	const elmCardDiv = $("<div class='col-md-4 mb-4'>").css("display", "flex");
+
+	const elmCard = $("<div class='card'>").appendTo(elmCardDiv);
+
+	const elmImg = $("<img>").attr({
+		id: 'id1',
+		src: imageSource,
+		alt: '..',
+		width: "80",
+		height: "280",
+		class: "card-img-top",
+	}).appendTo(elmCard);
+
+	const elmCardBody = $("<div class='card-body'>").appendTo(elmCard);
+
+	const elmH = $("<h5 class='card-title'>").appendTo(elmCardBody).css("font-size", "2vw").text(cardTitleText);
+
+	const elmP = $("<p class='card-text pb-3'>").appendTo(elmCardBody)
+
+	const elmCardFooter = $("<div class='card-footer'>").appendTo(elmCard);
+
+	const elmReleaseDate = $("<small class='text-muted float-left'>").appendTo(elmCardFooter).text(`Çıkış Tarihi: ${releaseDate}`);
+
+	const elmSpanFav = $("<small class='text-muted float-right'>").appendTo(elmCardFooter);
+
+	const elmIcon = $("<i class='far fa-heart fa-2x'>").appendTo(elmSpanFav);
+
+	return elmCardDiv[0];
+}
+
+getMovies = (searchText) => {
+	const elmSearchResult = $('.search-result');
+
+	axios.get('http://www.omdbapi.com/?i=tt3896198&apikey=7ddb68cb&s=' + searchText)
 		.then((response) => {
-			console.log(response);
+
 			let movies = response.data.Search;
-			let output = '';
+
+			elmSearchResult.empty();
+
 			$.each(movies, (index, movie) => {
-				output += ` <div class="col-md-4 mb-4">
-            <div class="card">
-            <img src="${movie.Poster}" width="80" height="280" class="card-img-top" alt="...">
-            <div class="card-body">
-              <h5 class="card-title">${movie.Title}</h5>
-              <p class="card-text pb-3">
-                <small class="text-muted float-left">ÇIKIŞ TARİHİ</small>
-                <small class="text-muted float-right">RATİNG</small>
-              </p>
-              <p class="card-text">içerik</p>
-            </div>
-            <div class="card-footer">
-              <small class="text-muted float-right">
-                <i class="far fa-heart fa-2x"></i></small>
-            </div>
-          </div>
-          </div>
-`;
+				let image = movie.Poster == 'N/A' ? "./assets/img/download.png" : movie.Poster;
+
+				output = filmCard(image, movie.Title, movie.Year);
+
+				elmSearchResult.append(output);
 			});
-			$('.search-result').html(output);
 		})
 		.catch((err) => {
 			console.log(err);
