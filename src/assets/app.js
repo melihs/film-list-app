@@ -14,7 +14,6 @@ let searchController = {
     },
     bindActions: function () {
         formSubmit(this.doms.searchForm, this.doms.searchText, this.doms.elmSearchResult);
-        filmCard();
     },
     functions: {
         getMovies: getMovies = (searchText, elmSearchResult) => {
@@ -33,7 +32,9 @@ let searchController = {
                         elmSearchResult.append(output);
 
                         setFavorite(movie.imdbID);
+                        cardEffect(movie.imdbID);
                     });
+
                 })
                 .catch(err => console.error(err));
         },
@@ -45,9 +46,9 @@ let searchController = {
             })
         },
         filmCard: filmCard = (imageSource, cardTitleText, releaseDate, filmId) => {
-            const elmCardDiv = $("<div class='col-md-4 mb-4'>").css("display", "flex");
+            const elmCardDiv = $(`<div class='col-md-4 mb-4 card-${filmId}'>`).css("display", "flex");
 
-            const elmCard = $("<div class='card'>").appendTo(elmCardDiv);
+            const elmCard = $(`<div class='card box-${filmId}'>`).appendTo(elmCardDiv);
 
             const elmImg = $("<img>").attr({
                 src: imageSource,
@@ -75,10 +76,34 @@ let searchController = {
         },
 
         setFavorite: setFavorite = (filmId) => {
-            $(`#${filmId}`).on('click', () => {
-                $(`#${filmId}`).css('color', 'red').addClass('fas').removeClass('far');
+            let icon = $(`#${filmId}`),
+                currentCardClass,
+                currentCard;
+
+            icon.on('click', (event) => {
+                currentCardClass = event.target.parentElement.parentElement.parentElement.parentElement.classList[2];
+
+                currentCard = $(`.${currentCardClass}`).clone();
+
+                $('#favorites').append(currentCard);
+
+                icon.css('color', 'red').addClass('fas').removeClass('far');
             });
-        }
+        },
+        cardEffect: cardEffect = (testID) => {
+            let className, cardClass;
+
+            $('.card-' + testID).mouseover(function () {
+                cardClass = $('.box-' + testID);
+
+                className = cardClass[0].classList[1];
+
+                $(`.${className}`).css('box-shadow', '0 1rem 2rem black');
+            });
+            $('.box-' + testID).mouseout(function () {
+                $(`.${className}`).css('box-shadow', '');
+            });
+        },
     }
 }
 
