@@ -1,30 +1,30 @@
-let  searchController = {
+let searchController = {
     init: function () {
     },
     onload: function () {
         this.doms = {
             searchForm: $('#searchForm'),
             searchText: $('#searchText'),
-           elmSearchResult: $('.search-result'),
+            elmSearchResult: $('#searchResult'),
         }
         this.bindActions();
     },
     bindActions: function () {
-        formSubmit(this.doms.searchForm, this.doms.searchText,this.doms.elmSearchResult);
+        formSubmit(this.doms.searchForm, this.doms.searchText, this.doms.elmSearchResult);
     },
     functions: {
         getMovies: getMovies = (searchText, elmSearchResult) => {
-             key = "7ddb68cb&s=",
-             url = "http://www.omdbapi.com/?i=tt3896198&";
+            key = "7ddb68cb&s=",
+                url = "http://www.omdbapi.com/?i=tt3896198&";
 
             fetch(url + "apikey=" + key + searchText.val() + "&format=json")
                 .then(response => response.json())
-                .then(data =>  {
+                .then(data => {
                     let movies = data.Search;
                     elmSearchResult.empty();
 
                     $.each(movies, (index, movie) => {
-                        let image = movie.Poster == 'N/A' ? "./assets/img/download.png" : movie.Poster;
+                        let image = movie.Poster == 'N/A' ? "./assets/img/no-image.jpg" : movie.Poster;
 
                         output = filmCard(image, movie.Title, movie.Year);
 
@@ -40,13 +40,12 @@ let  searchController = {
                 e.preventDefault();
             })
         },
-        filmCard : filmCard = (imageSource, cardTitleText, releaseDate) => {
+        filmCard: filmCard = (imageSource, cardTitleText, releaseDate) => {
             const elmCardDiv = $("<div class='col-md-4 mb-4'>").css("display", "flex");
 
             const elmCard = $("<div class='card'>").appendTo(elmCardDiv);
 
             const elmImg = $("<img>").attr({
-                id: 'id1',
                 src: imageSource,
                 alt: '..',
                 width: "80",
@@ -56,7 +55,7 @@ let  searchController = {
 
             const elmCardBody = $("<div class='card-body'>").appendTo(elmCard);
 
-            const elmH = $("<h5 class='card-title'>").appendTo(elmCardBody).css("font-size", "2vw").text(cardTitleText);
+            const elmH = $("<h5 class='card-title'>").appendTo(elmCardBody).css("font-size", "24px").text(cardTitleText);
 
             const elmP = $("<p class='card-text pb-3'>").appendTo(elmCardBody)
 
@@ -69,12 +68,15 @@ let  searchController = {
             const elmIcon = $("<i class='far fa-heart fa-2x'>").appendTo(elmSpanFav);
 
             return elmCardDiv[0];
+        },
+        searchHistory: searchHistory = (searchText) => {
+
         }
     }
 }
 
 searchController.init();
 
-$(document).ready(function (){
+$(document).ready(function () {
     searchController.onload();
 });
