@@ -4,21 +4,23 @@ let  searchController = {
     onload: function () {
         this.doms = {
             searchForm: $('#searchForm'),
+            searchText: $('#searchText'),
+           elmSearchResult: $('.search-result'),
         }
         this.bindActions();
     },
     bindActions: function () {
-        formSubmit(this.doms.searchForm);
+        formSubmit(this.doms.searchForm, this.doms.searchText,this.doms.elmSearchResult);
     },
     functions: {
-        getMovies: getMovies = (searchText) => {
-            const elmSearchResult = $('.search-result');
+        getMovies: getMovies = (searchText, elmSearchResult) => {
+             key = "7ddb68cb&s=",
+             url = "http://www.omdbapi.com/?i=tt3896198&";
 
-            axios.get('http://www.omdbapi.com/?i=tt3896198&apikey=7ddb68cb&s=' + searchText)
-                .then((response) => {
-
-                    let movies = response.data.Search;
-
+            fetch(url + "apikey=" + key + searchText.val() + "&format=json")
+                .then(response => response.json())
+                .then(data =>  {
+                    let movies = data.Search;
                     elmSearchResult.empty();
 
                     $.each(movies, (index, movie) => {
@@ -29,13 +31,11 @@ let  searchController = {
                         elmSearchResult.append(output);
                     });
                 })
-                .catch((err) => {
-                    console.log(err);
-                });
+                .catch(err => console.error(err));
         },
-        formSubmit: formSubmit = (searchForm) => {
+        formSubmit: formSubmit = (searchForm, searchText, elmSearchResult) => {
             searchForm.on('submit', (e) => {
-                getMovies($('#searchText').val());
+                getMovies(searchText, elmSearchResult);
 
                 e.preventDefault();
             })
