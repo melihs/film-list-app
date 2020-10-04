@@ -3,6 +3,7 @@ let searchController = {
         this.defaultImage = "./assets/img/no-image.jpg";
         this.key = "7ddb68cb&s";
         this.url = "http://www.omdbapi.com/?i=tt3896198&";
+        this.favorites;
     },
     onload: function () {
         this.doms = {
@@ -31,8 +32,10 @@ let searchController = {
 
                         elmSearchResult.append(output);
 
+                        updateFavorite(movie.imdbID);
                         setFavorite(movie.imdbID);
                         cardEffect(movie.imdbID);
+
                     });
 
                 })
@@ -74,41 +77,127 @@ let searchController = {
 
             return elmCardDiv[0];
         },
-
         setFavorite: setFavorite = (filmId) => {
             let icon = $(`#${filmId}`),
                 currentCardClass,
                 currentCard;
 
             icon.on('click', (event) => {
+                let favoriteCard = JSON.parse(localStorage.getItem("favorite"));
+
                 currentCardClass = event.target.parentElement.parentElement.parentElement.parentElement.classList[2];
 
-                currentCard = $(`.${currentCardClass}`).clone();
+                if (!favoriteCard) {
+                    favoriteList.push({ 'class': currentCardClass, 'status': true });
 
-                $('#favorites').append(currentCard);
+                    lStorage.setItem("favorite", JSON.stringify({ 'favs': favoriteList }));
 
-                icon.css('color', 'red').addClass('fas').removeClass('far');
+                    currentCard = $("." + currentCardClass).clone();
+
+                    favorites = $('#favorites');
+
+                    currentCard.appendTo(favorites);
+
+                    $('#' + filmId).css('color', 'red').addClass('fas').removeClass('far');
+                }
+
+                if (favoriteCard) {
+                    if (favoriteCard.status && filmId !== favoriteCard.class) {
+                        favoriteList.push({ 'class': currentCardClass, 'status': false });
+
+                        localStorage.setItem("favorite", JSON.stringify({ 'favs': favoriteList }));
+
+                        $("#favorites ." + currentCardClass).remove();
+
+                        currentCard = $("." + currentCardClass);
+
+                        $('#favorites').html(currentCard);
+
+                        $('* #' + filmId).css('color', 'red').addClass('far').removeClass('fas');
+                    }
+                    if (favoriteCard.status && "card-" + filmId !== favoriteCard.class) {
+                        favoriteList.push({ 'class': currentCardClass, 'status': false });
+
+                        localStorage.setItem("favorite", JSON.stringify({ 'favs': favoriteList }));
+
+                        icon.css('color', 'red').addClass('far').removeClass('fas');
+                    }
+                    if (!favoriteCard.status) {
+                        if ("card-" + filmId === favoriteCard.class) {
+                            currentCard = $("." + currentCardClass).clone();
+
+                            $('#favorites').html(currentCard);
+
+                            $('body #' + filmId).css('color', 'red').addClass('fas').removeClass('far');
+                        }
+
+                        if ("card-" + filmId !== favoriteCard.class) {
+                            let checkFav = checkFavCard(favoriteList, filmId);
+
+                            if (checkFav && checkFav.check) {
+                                localStorage.setItem("favorite", JSON.stringify({ 'favs': checkFav.result }));
+                            }
+
+                            favoriteList.push({ 'class': currentCardClass, 'status': true });
+
+                            localStorage.setItem("favorite", JSON.stringify({ 'favs': favoriteList }));
+
+                            icon.css('color', 'red').addClass('far').removeClass('fas');
+                        }
+                    }
+                }
             });
         },
-        cardEffect: cardEffect = (testID) => {
+        updateFavorite: updateFavorite = (filmId) => {
+            let favoriteCard = JSON.parse(localStorage.getItem("favorite"));
+
+            if (!favoriteCard) return;
+
+            favoriteCard.favs.forEach((card) => {
+                if ("card-" + filmId === card.class && card.status) {
+                    currentCard = $('.' + card.class).clone();
+
+                    favorites = $('#favorites');
+
+                    $(`#${filmId}`).css('color', 'red').addClass('fas').removeClass('far');
+
+                    currentCard.appendTo(favorites);
+                }
+            });
+        },
+        cardEffect: cardEffect = (cardId) => {
             let className, cardClass;
 
-            $('.card-' + testID).mouseover(function () {
-                cardClass = $('.box-' + testID);
+            $('.card-' + cardId).mouseover(function () {
+                cardClass = $('.box-' + cardId);
 
                 className = cardClass[0].classList[1];
 
                 $(`.${className}`).css('box-shadow', '0 1rem 2rem black');
             });
-            $('.box-' + testID).mouseout(function () {
+            $('.box-' + cardId).mouseout(function () {
                 $(`.${className}`).css('box-shadow', '');
             });
         },
+        checkFavCard: checkFavCard = (favoriteList, cardId) => {
+            let result;
+            favoriteList.forEach((item) => {
+                if (item.class === 'card-' + cardId) {
+                    item.status = false;
+
+                    result = { 'result': favoriteList, 'check': true };
+                }
+
+                if (item.class !== 'card-' + cardId) {
+                    result = false;
+                }
+            });
+        }
     }
 }
 
 searchController.init();
-
+const favoriteList = [];
 $(document).ready(function () {
     searchController.onload();
 });
