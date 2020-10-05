@@ -2,8 +2,7 @@ let searchController = {
     init: function () {
         this.defaultImage = "./assets/img/no-image.jpg";
         this.key = "7ddb68cb&s";
-        this.url = "http://www.omdbapi.com/?i=tt3896198&";
-        this.favorites;
+        this.url = "http://www.omdbapi.com";
     },
     onload: function () {
         this.doms = {
@@ -14,33 +13,10 @@ let searchController = {
         this.bindActions();
     },
     bindActions: function () {
+        getFavorites();
         formSubmit(this.doms.searchForm, this.doms.searchText, this.doms.elmSearchResult);
     },
     functions: {
-        getMovies: getMovies = (searchText, elmSearchResult) => {
-            fetch(`${searchController.url}apikey=${searchController.key}=${searchText.val()}&format=json`)
-                .then(response => response.json())
-                .then(data => {
-                    let movies = data.Search;
-
-                    elmSearchResult.empty();
-
-                    $.each(movies, (index, movie) => {
-                        image = movie.Poster == 'N/A' ? searchController.defaultImage : movie.Poster;
-
-                        output = filmCard(image, movie.Title, movie.Year, movie.imdbID);
-
-                        elmSearchResult.append(output);
-
-                        updateFavorite(movie.imdbID);
-                        setFavorite(movie.imdbID);
-                        cardEffect(movie.imdbID);
-
-                    });
-
-                })
-                .catch(err => console.error(err));
-        },
         formSubmit: formSubmit = (searchForm, searchText, elmSearchResult) => {
             searchForm.on('submit', (e) => {
                 getMovies(searchText, elmSearchResult);
@@ -48,13 +24,39 @@ let searchController = {
                 e.preventDefault();
             })
         },
-        filmCard: filmCard = (imageSource, cardTitleText, releaseDate, filmId) => {
-            const elmCardDiv = $(`<div class='col-md-4 mb-4 card-${filmId}'>`).css("display", "flex");
+        getMovies: getMovies = (searchText, elmSearchResult) => {
+            fetch(`${searchController.url}/?i=tt3896198&apikey=${searchController.key}=${searchText.val()}`)
+                .then(response => response.json())
+                .then(data => {
+                    let movies = data.Search;
 
-            const elmCard = $(`<div class='card box-${filmId}'>`).appendTo(elmCardDiv);
+                    elmSearchResult.empty();
+
+                    $.each(movies, (index, movie) => {
+                        output = filmCard({
+                            poster: (movie.Poster == 'N/A') ? searchController.defaultImage : movie.Poster,
+                            title: movie.Title,
+                            year: movie.Year,
+                            imdbID: movie.imdbID,
+                            iconClass: 'far',
+                            iconColor: '',
+                            iconCursor: 'pointer',
+                        });
+
+                        elmSearchResult.append(output);
+
+                    });
+                    setFavorite();
+                })
+                .catch(err => console.error(err));
+        },
+        filmCard: filmCard = ({ poster, title, year, imdbID, iconClass, iconColor, iconCursor }) => {
+            const elmCardDiv = $(`<div class='col-md-4 mb-4 card-${imdbID}'>`).css("display", "flex");
+
+            const elmCard = $(`<div class='card box-${imdbID}'>`).appendTo(elmCardDiv);
 
             const elmImg = $("<img>").attr({
-                src: imageSource,
+                src: poster,
                 alt: '..',
                 width: "80",
                 height: "280",
@@ -63,107 +65,89 @@ let searchController = {
 
             const elmCardBody = $("<div class='card-body'>").appendTo(elmCard);
 
-            const elmH = $("<h5 class='card-title'>").appendTo(elmCardBody).css("font-size", "24px").text(cardTitleText);
+            const elmH = $("<h5 class='card-title'>")
+                .appendTo(elmCardBody)
+                .css("font-size", "24px")
+                .text(title);
 
             const elmP = $("<p class='card-text pb-3'>").appendTo(elmCardBody)
 
             const elmCardFooter = $("<div class='card-footer'>").appendTo(elmCard);
 
-            const elmReleaseDate = $("<small class='text-muted float-left'>").appendTo(elmCardFooter).text(`Çıkış Tarihi: ${releaseDate}`);
+            const elmReleaseDate = $("<small class='text-muted float-left'>")
+                .appendTo(elmCardFooter)
+                .text(`Çıkış Tarihi: ${year}`);
 
             const elmSpanFav = $("<small class='text-muted float-right'>").appendTo(elmCardFooter);
 
-            const elmIcon = $("<i class='far fa-heart fa-2x'>").attr('id', `${filmId}`).css('cursor', 'pointer').appendTo(elmSpanFav);
+            const elmIcon = $(`<i class='${iconClass} fa-heart fa-2x'>`)
+                .attr('id', `${imdbID}`)
+                .css({ 'cursor': `${iconCursor}`, 'color': `${iconColor}` })
+                .appendTo(elmSpanFav);
 
             return elmCardDiv[0];
         },
-        setFavorite: setFavorite = (filmId) => {
-            let icon = $(`#${filmId}`),
-                currentCardClass,
-                currentCard;
+        getFavorites: getFavorites = () => {
+            let favoriteList = JSON.parse(localStorage.getItem('favorites')) || [];
 
-            icon.on('click', (event) => {
-                let favoriteCard = JSON.parse(localStorage.getItem("favorite"));
-
-                currentCardClass = event.target.parentElement.parentElement.parentElement.parentElement.classList[2];
-
-                if (!favoriteCard) {
-                    favoriteList.push({ 'class': currentCardClass, 'status': true });
-
-                    lStorage.setItem("favorite", JSON.stringify({ 'favs': favoriteList }));
-
-                    currentCard = $("." + currentCardClass).clone();
-
-                    favorites = $('#favorites');
-
-                    currentCard.appendTo(favorites);
-
-                    $('#' + filmId).css('color', 'red').addClass('fas').removeClass('far');
-                }
-
-                if (favoriteCard) {
-                    if (favoriteCard.status && filmId !== favoriteCard.class) {
-                        favoriteList.push({ 'class': currentCardClass, 'status': false });
-
-                        localStorage.setItem("favorite", JSON.stringify({ 'favs': favoriteList }));
-
-                        $("#favorites ." + currentCardClass).remove();
-
-                        currentCard = $("." + currentCardClass);
-
-                        $('#favorites').html(currentCard);
-
-                        $('* #' + filmId).css('color', 'red').addClass('far').removeClass('fas');
-                    }
-                    if (favoriteCard.status && "card-" + filmId !== favoriteCard.class) {
-                        favoriteList.push({ 'class': currentCardClass, 'status': false });
-
-                        localStorage.setItem("favorite", JSON.stringify({ 'favs': favoriteList }));
-
-                        icon.css('color', 'red').addClass('far').removeClass('fas');
-                    }
-                    if (!favoriteCard.status) {
-                        if ("card-" + filmId === favoriteCard.class) {
-                            currentCard = $("." + currentCardClass).clone();
-
-                            $('#favorites').html(currentCard);
-
-                            $('body #' + filmId).css('color', 'red').addClass('fas').removeClass('far');
-                        }
-
-                        if ("card-" + filmId !== favoriteCard.class) {
-                            let checkFav = checkFavCard(favoriteList, filmId);
-
-                            if (checkFav && checkFav.check) {
-                                localStorage.setItem("favorite", JSON.stringify({ 'favs': checkFav.result }));
-                            }
-
-                            favoriteList.push({ 'class': currentCardClass, 'status': true });
-
-                            localStorage.setItem("favorite", JSON.stringify({ 'favs': favoriteList }));
-
-                            icon.css('color', 'red').addClass('far').removeClass('fas');
-                        }
-                    }
-                }
+            favoriteList.forEach(function (favorite) {
+                fetch(`${searchController.url}?i=${favorite}&apikey=${searchController.key}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        let result = filmCard({
+                            poster: data.Poster,
+                            title: data.Title,
+                            year: data.Year,
+                            imdbID: data.imdbID,
+                            iconClass: 'fas',
+                            iconColor: 'red',
+                            iconCursor: '',
+                        });
+                        $('#favorites').append(result);
+                    })
+                    .catch(err => console.error(err));
             });
         },
-        updateFavorite: updateFavorite = (filmId) => {
-            let favoriteCard = JSON.parse(localStorage.getItem("favorite"));
+        setFavorite: setFavorite = () => {
+            let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 
-            if (!favoriteCard) return;
+            favorites.forEach(function (favorite) {
+                let favIcon = document.getElementById(favorite);
 
-            favoriteCard.favs.forEach((card) => {
-                if ("card-" + filmId === card.class && card.status) {
-                    currentCard = $('.' + card.class).clone();
-
-                    favorites = $('#favorites');
-
-                    $(`#${filmId}`).css('color', 'red').addClass('fas').removeClass('far');
-
-                    currentCard.appendTo(favorites);
+                if (favIcon && favIcon.className) {
+                    favIcon.className = 'fas fa-heart fa-2x';
+                    favIcon.style.color = 'red';
                 }
             });
+
+            document.querySelector('#searchResult').addEventListener('click', function (e) {
+                let id = e.target.id,
+                    item = e.target,
+                    index = favorites.indexOf(id);
+
+                if (!id) return;
+
+                if (index == -1) {
+                    favorites.push(id);
+
+                    item.className = 'fas fa-heart fa-2x';
+
+                    item.style.color = 'red';
+
+                    $(`.card-${id}`).clone().appendTo($('#favorites'));
+
+                    $('#favorites #' + id).css('cursor', '');
+                } else {
+                    favorites.splice(index, 1);
+
+                    item.className = 'far fa-heart fa-2x';
+
+                    item.style.color = '';
+
+                    $('#favorites .card-' + id).remove();
+                }
+                localStorage.setItem('favorites', JSON.stringify(favorites));
+            })
         },
         cardEffect: cardEffect = (cardId) => {
             let className, cardClass;
@@ -179,25 +163,10 @@ let searchController = {
                 $(`.${className}`).css('box-shadow', '');
             });
         },
-        checkFavCard: checkFavCard = (favoriteList, cardId) => {
-            let result;
-            favoriteList.forEach((item) => {
-                if (item.class === 'card-' + cardId) {
-                    item.status = false;
-
-                    result = { 'result': favoriteList, 'check': true };
-                }
-
-                if (item.class !== 'card-' + cardId) {
-                    result = false;
-                }
-            });
-        }
     }
 }
 
 searchController.init();
-const favoriteList = [];
 $(document).ready(function () {
     searchController.onload();
 });
