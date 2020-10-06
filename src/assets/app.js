@@ -19,13 +19,30 @@ let searchController = {
     },
     functions: {
         formSubmit: formSubmit = (searchForm, searchText, elmSearchResult) => {
-            searchForm.on('submit', (e) => {
-                getMovies(searchText, elmSearchResult);
+            const elmNotify = $("<div>").attr('id', 'notify').addClass("alert alert-danger").text('Minimum 3 karakter girmelisiniz!');
+            $("input").on("keyup", function (e) {
+                let charLength = $(this).val().length;
 
-                window.scrollTo(0, -60);
+                if (charLength >= 3 || charLength == 0) {
+                    $('#notify').remove()
 
-                e.preventDefault();
-            })
+                    $('#searchBtn').prop('disabled', false);
+
+                    searchForm.on('submit', (e) => {
+                        getMovies(searchText, elmSearchResult);
+
+                        // searchHistory(searchText);
+
+                        window.scrollTo(0, -60);
+
+                        e.preventDefault();
+                    })
+                } else {
+                    elmNotify.prependTo($('#searchForm'));
+
+                    $('#searchBtn').prop('disabled', true);
+                }
+            });
         },
         getMovies: getMovies = (searchText, elmSearchResult) => {
             fetch(`${searchController.url}/?i=tt3896198&apikey=${searchController.key}=${searchText.val()}`)
@@ -179,6 +196,21 @@ let searchController = {
                 $(`.${className}`).css('box-shadow', '');
             });
         },
+        // searchHistory: searchHistory = (searcText) => {
+            // let searchs = JSON.parse(localStorage.getItem('searchs')) || [];
+            // let keyword = searcText.val()
+            //
+            // if (searchs.length >= 10) return;
+            //
+            // if (searchs.length > 0) {
+            //     let checkSearchItem = searchs.find((item) => item === keyword);
+            //     console.log(checkSearchItem);
+            // } else {
+            //     searchs.push(keyword);
+            //
+            //     localStorage.setItem('searchs', JSON.stringify(searchs));
+            // }
+        // }
     }
 }
 
