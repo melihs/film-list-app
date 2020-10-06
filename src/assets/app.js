@@ -3,6 +3,7 @@ let searchController = {
         this.defaultImage = "./assets/img/no-image.jpg";
         this.key = "7ddb68cb&s";
         this.url = "http://www.omdbapi.com";
+        this.favoriteList = JSON.parse(localStorage.getItem('favorites')) || [];
     },
     onload: function () {
         this.doms = {
@@ -21,6 +22,8 @@ let searchController = {
             searchForm.on('submit', (e) => {
                 getMovies(searchText, elmSearchResult);
 
+                window.scrollTo(0, -60);
+
                 e.preventDefault();
             })
         },
@@ -33,24 +36,23 @@ let searchController = {
                     elmSearchResult.empty();
 
                     $.each(movies, (index, movie) => {
+                        image = (movie.Poster == 'N/A') ? searchController.defaultImage : movie.Poster;
                         output = filmCard({
-                            poster: (movie.Poster == 'N/A') ? searchController.defaultImage : movie.Poster,
+                            poster: image,
                             title: movie.Title,
                             year: movie.Year,
                             imdbID: movie.imdbID,
                             iconClass: 'far',
                             iconColor: '',
-                            iconCursor: 'pointer',
                         });
 
                         elmSearchResult.append(output);
-
                     });
                     setFavorite();
                 })
                 .catch(err => console.error(err));
         },
-        filmCard: filmCard = ({ poster, title, year, imdbID, iconClass, iconColor, iconCursor }) => {
+        filmCard: filmCard = ({ poster, title, year, imdbID, iconClass, iconColor }) => {
             const elmCardDiv = $(`<div class='col-md-4 mb-4 card-${imdbID}'>`).css("display", "flex");
 
             const elmCard = $(`<div class='card box-${imdbID}'>`).appendTo(elmCardDiv);
@@ -82,15 +84,13 @@ let searchController = {
 
             const elmIcon = $(`<i class='${iconClass} fa-heart fa-2x'>`)
                 .attr('id', `${imdbID}`)
-                .css({ 'cursor': `${iconCursor}`, 'color': `${iconColor}` })
+                .css({ 'cursor': "pointer", 'color': `${iconColor}` })
                 .appendTo(elmSpanFav);
 
             return elmCardDiv[0];
         },
         getFavorites: getFavorites = () => {
-            let favoriteList = JSON.parse(localStorage.getItem('favorites')) || [];
-
-            favoriteList.forEach(function (favorite) {
+            searchController.favoriteList.forEach(function (favorite) {
                 fetch(`${searchController.url}?i=${favorite}&apikey=${searchController.key}`)
                     .then(response => response.json())
                     .then(data => {
@@ -101,11 +101,25 @@ let searchController = {
                             imdbID: data.imdbID,
                             iconClass: 'fas',
                             iconColor: 'red',
-                            iconCursor: '',
                         });
                         $('#favorites').append(result);
                     })
                     .catch(err => console.error(err));
+            });
+            document.querySelector('#favorites').addEventListener('click', function (e) {
+                let id = e.target.id;
+
+                let removeIndex = searchController.favoriteList.findIndex(list => list === id);
+
+                searchController.favoriteList.splice(removeIndex, 1);
+
+                localStorage.setItem('favorites', JSON.stringify(searchController.favoriteList));
+
+                if (!id) return;
+
+                $('body #' + id).css('color', '').removeClass("fas").addClass("far");
+
+                $('#favorites .card-' + id).remove();
             });
         },
         setFavorite: setFavorite = () => {
@@ -128,15 +142,17 @@ let searchController = {
                 if (!id) return;
 
                 if (index == -1) {
+
                     favorites.push(id);
+
+                    searchController.favoriteList = favorites;
 
                     item.className = 'fas fa-heart fa-2x';
 
                     item.style.color = 'red';
 
-                    $(`.card-${id}`).clone().appendTo($('#favorites'));
+                    !$('#favorites .card-' + id).length ? $('.card-' + id).clone().appendTo($('#favorites')) : null;
 
-                    $('#favorites #' + id).css('cursor', '');
                 } else {
                     favorites.splice(index, 1);
 
