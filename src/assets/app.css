@@ -1,3 +1,6 @@
 .search-history {
     margin-top: 60px;
 }
+.card-h:hover {
+    box-shadow: 0 1rem 2rem black;
+}

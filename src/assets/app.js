@@ -17,6 +17,7 @@ let searchController = {
     bindActions: function () {
         getFavorites();
         getSearchHistory(searchController.searchList);
+        // cancelSearchItem();
         formSubmit(this.doms.searchForm, this.doms.searchText, this.doms.elmSearchResult);
     },
     functions: {
@@ -76,7 +77,7 @@ let searchController = {
         filmCard: filmCard = ({ poster, title, year, imdbID, iconClass, iconColor }) => {
             const elmCardDiv = $(`<div class='col-md-4 mb-4 card-${imdbID}'>`).css("display", "flex");
 
-            const elmCard = $(`<div class='card box-${imdbID}'>`).appendTo(elmCardDiv);
+            const elmCard = $("<div>").addClass("card card-h").appendTo(elmCardDiv);
 
             const elmImg = $("<img>").attr({
                 src: poster,
@@ -186,24 +187,10 @@ let searchController = {
                 localStorage.setItem('favorites', JSON.stringify(favorites));
             })
         },
-        cardEffect: cardEffect = (cardId) => {
-            let className, cardClass;
-
-            $('.card-' + cardId).mouseover(function () {
-                cardClass = $('.box-' + cardId);
-
-                className = cardClass[0].classList[1];
-
-                $(`.${className}`).css('box-shadow', '0 1rem 2rem black');
-            });
-            $('.box-' + cardId).mouseout(function () {
-                $(`.${className}`).css('box-shadow', '');
-            });
-        },
         getSearchHistory: getSearchHistory = (searchs) => {
             const tag = (buttonText) => {
                 const elmButton = $('<button>').addClass('btn btn-light border border-secondary mb-2 ml-2').attr('type', 'button').text(buttonText);
-                const elmSpan = $('<span>').addClass('badge badge-light float-right ml-4').text('x').appendTo(elmButton);
+                const elmSpan = $('<span>').attr('id', buttonText).addClass('badge badge-light float-right ml-4').text('x').appendTo(elmButton);
 
                 return elmButton;
             }
@@ -211,8 +198,6 @@ let searchController = {
             searchs.forEach(function (search) {
                 tag(search).appendTo($('#searchHistory'));
             });
-
-            // $('#favorites').append(result);
         },
         setSearchHistory: setSearchHistory = (searcText) => {
             let searchs = JSON.parse(localStorage.getItem('searchs')) || [];
@@ -228,7 +213,13 @@ let searchController = {
 
                 getSearchHistory(searchs);
             }
-        }
+        },
+        // cancelSearchItem: cancelSearchItem = () => {
+        //     document.querySelector('#searchHistory,span').addEventListener('click', function (e) {
+        //         let id = e.target.id;
+        //         console.log(id);
+        //     });
+        // }
     }
 }
 
