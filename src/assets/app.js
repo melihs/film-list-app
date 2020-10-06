@@ -4,7 +4,6 @@ let searchController = {
         this.key = "7ddb68cb&s";
         this.url = "http://www.omdbapi.com";
         this.favoriteList = JSON.parse(localStorage.getItem('favorites')) || [];
-        this.searchList = JSON.parse(localStorage.getItem('searchs')) || [];
     },
     onload: function () {
         this.doms = {
@@ -16,8 +15,8 @@ let searchController = {
     },
     bindActions: function () {
         getFavorites();
-        getSearchHistory(searchController.searchList);
-        // cancelSearchItem();
+        getSearchHistory();
+        cancelSearchItem();
         formSubmit(this.doms.searchForm, this.doms.searchText, this.doms.elmSearchResult);
     },
     functions: {
@@ -187,7 +186,7 @@ let searchController = {
                 localStorage.setItem('favorites', JSON.stringify(favorites));
             })
         },
-        getSearchHistory: getSearchHistory = (searchs) => {
+        getSearchHistory: getSearchHistory = () => {
             const tag = (buttonText) => {
                 const elmButton = $('<button>').addClass('btn btn-light border border-secondary mb-2 ml-2').attr('type', 'button').text(buttonText);
                 const elmSpan = $('<span>').attr('id', buttonText).addClass('badge badge-light float-right ml-4').text('x').appendTo(elmButton);
@@ -195,14 +194,17 @@ let searchController = {
                 return elmButton;
             }
             $('#searchHistory').empty();
+
+            let searchs = JSON.parse(localStorage.getItem('searchs')) || [];
+
             searchs.forEach(function (search) {
                 tag(search).appendTo($('#searchHistory'));
             });
         },
         setSearchHistory: setSearchHistory = (searcText) => {
-            let searchs = JSON.parse(localStorage.getItem('searchs')) || [];
-            let keyword = searcText.val();
-            let checkSearchItem = searchs.find((item) => item === keyword);
+            let searchs = JSON.parse(localStorage.getItem('searchs')) || [],
+                keyword = $.trim(searcText.val()),
+                checkSearchItem = searchs.find((item) => item === keyword);
 
             if (searchs.length >= 10) return;
 
@@ -214,12 +216,20 @@ let searchController = {
                 getSearchHistory(searchs);
             }
         },
-        // cancelSearchItem: cancelSearchItem = () => {
-        //     document.querySelector('#searchHistory,span').addEventListener('click', function (e) {
-        //         let id = e.target.id;
-        //         console.log(id);
-        //     });
-        // }
+        cancelSearchItem: cancelSearchItem = () => {
+            document.querySelector('#searchHistory').addEventListener('click', function (e) {
+                let id = e.target.id;
+
+                if (!id) return;
+
+                let searchs = JSON.parse(localStorage.getItem('searchs')) || [],
+                    result = searchs.filter(val => val != id);
+
+                localStorage.setItem('searchs', JSON.stringify(result));
+
+                e.path[1].remove();
+            });
+        }
     }
 }
 
