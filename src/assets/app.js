@@ -17,6 +17,7 @@ let searchController = {
         getFavorites();
         getSearchHistory();
         cancelSearchItem();
+        savedSearch(this.doms.elmSearchResult);
         formSubmit(this.doms.searchForm, this.doms.searchText, this.doms.elmSearchResult);
     },
     functions: {
@@ -39,7 +40,7 @@ let searchController = {
             });
 
             searchForm.on('submit', (e) => {
-                getMovies(searchText, elmSearchResult);
+                getMovies(searchText.val(), elmSearchResult);
 
                 setSearchHistory(searchText);
 
@@ -49,7 +50,7 @@ let searchController = {
             })
         },
         getMovies: getMovies = (searchText, elmSearchResult) => {
-            fetch(`${searchController.url}/?i=tt3896198&apikey=${searchController.key}=${searchText.val()}`)
+            fetch(`${searchController.url}/?i=tt3896198&apikey=${searchController.key}=${searchText}`)
                 .then(response => response.json())
                 .then(data => {
                     let movies = data.Search;
@@ -188,8 +189,17 @@ let searchController = {
         },
         getSearchHistory: getSearchHistory = () => {
             const tag = (buttonText) => {
-                const elmButton = $('<button>').addClass('btn btn-light border border-secondary mb-2 ml-2').attr('type', 'button').text(buttonText);
-                const elmSpan = $('<span>').attr('id', buttonText).addClass('badge badge-light float-right ml-4').text('x').appendTo(elmButton);
+                const elmButton = $('<button>')
+                    .attr('id', 'btn-' + buttonText)
+                    .addClass('btn btn-light border border-secondary mb-2 ml-2')
+                    .attr('type', 'button')
+                    .text(buttonText);
+
+                const elmSpan = $('<span>')
+                    .attr('id', buttonText)
+                    .addClass('badge badge-light float-right ml-4')
+                    .text('x')
+                    .appendTo(elmButton);
 
                 return elmButton;
             }
@@ -218,7 +228,10 @@ let searchController = {
         },
         cancelSearchItem: cancelSearchItem = () => {
             document.querySelector('#searchHistory').addEventListener('click', function (e) {
-                let id = e.target.id;
+                let id = e.target.id,
+                    target = $(e.target);
+
+                if (!target.is("span")) return;
 
                 if (!id) return;
 
@@ -228,6 +241,17 @@ let searchController = {
                 localStorage.setItem('searchs', JSON.stringify(result));
 
                 e.path[1].remove();
+            });
+        },
+        savedSearch: savedSearch = (elmSearchResult) => {
+            document.querySelector('#searchHistory').addEventListener('click', function (e) {
+                let target = $(e.target);
+
+                if (!target.is("button")) return;
+
+                let searchKeyword = e.target.id.substring(4);
+
+                getMovies(searchKeyword, elmSearchResult);
             });
         }
     }
